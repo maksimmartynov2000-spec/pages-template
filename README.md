@@ -4,7 +4,7 @@
 
 ## Новое приложение за 3 минуты с телефона
 
-Всё делается в Safari на github.com — в приложении GitHub настроек Pages нет.
+Всё делается в Safari на сайте github.com (не в приложении GitHub).
 
 **Один раз, для самого шаблона:** откройте `pages-template` → **Settings** → поставьте галочку **Template repository**.
 
