@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="app-build" content="2026-11-22·8c426d7d">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Приложение">
+<meta name="format-detection" content="telephone=no">
+<title>Приложение</title>
+<!--
+  Шаблон небольшого веб-приложения. Всё в одном файле, без внешних библиотек.
+  Метка сборки (app-build) должна оставаться в самом начале файла: её ставит tools/stamp.py,
+  а приложение сравнивает её со свежим index.html на сайте и обновляется само (блок «Самообновление» ниже).
+-->
+<style>
+  :root {
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --text: #1c1c1e;
+    --muted: #6c6c70;
+    --line: #d8d8de;
+    --accent: #1f8a4c;
+    --accent-text: #ffffff;
+    --field: #ffffff;
+    --shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 4px 16px rgba(0, 0, 0, .04);
+    --radius: 18px;
+    --gap: 20px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --text: #f2f2f7;
+      --muted: #a1a1a8;
+      --line: #38383c;
+      --accent: #30c26a;
+      --accent-text: #00210d;
+      --field: #2c2c2e;
+      --shadow: none;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --text: #f2f2f7;
+    --muted: #a1a1a8;
+    --line: #38383c;
+    --accent: #30c26a;
+    --accent-text: #00210d;
+    --field: #2c2c2e;
+    --shadow: none;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 19px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 20px 48px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  h1 { font-size: 34px; line-height: 1.15; margin: 0; letter-spacing: -.01em; }
+  h2 { font-size: 22px; line-height: 1.25; margin: 0 0 12px; }
+  p { margin: 0 0 14px; }
+  p:last-child { margin-bottom: 0; }
+  .muted { color: var(--muted); }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: var(--gap);
+  }
+
+  button, input, textarea, select { font: inherit; color: inherit; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn:active { opacity: .75; }
+  .btn.ghost { background: transparent; color: var(--accent); padding: 12px 14px; }
+  .btn.wide { width: 100%; }
+
+  .theme {
+    display: inline-flex;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+  .theme button {
+    border: 0;
+    background: transparent;
+    min-width: 44px;
+    min-height: 40px;
+    border-radius: 9px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+  }
+  .theme svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .theme svg .fill { fill: currentColor; stroke: none; }
+  .theme button[aria-pressed="true"] { color: var(--text); }
+  .theme button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+
+  label { display: block; font-weight: 600; margin-bottom: 8px; }
+  textarea, input[type="text"] {
+    display: block;
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 19px; /* не меньше 16px — иначе iPhone приближает поле при вводе */
+    outline: none;
+  }
+  textarea { min-height: 140px; resize: vertical; }
+  textarea:focus, input:focus { border-color: var(--accent); }
+
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+  .btn.big { font-size: 32px; font-weight: 500; min-width: 64px; padding: 6px 16px; }
+  .counter { font-size: 56px; font-weight: 700; line-height: 1; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+
+  footer { text-align: center; font-size: 15px; color: var(--muted); margin-top: 32px; }
+
+  /* плашка «Вышла новая версия» */
+  #updbar {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(560px, calc(100% - 32px));
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px 12px 20px;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+    z-index: 100;
+  }
+  #updbar span { flex: 1; line-height: 1.3; }
+  #updbar small { display: block; color: var(--muted); font-size: 15px; }
+  #updbar .btn { min-height: 46px; padding: 10px 18px; }
+  #updbar .x { border: 0; background: transparent; color: var(--muted); font-size: 22px; min-width: 44px; min-height: 44px; cursor: pointer; }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    top: calc(16px + env(safe-area-inset-top));
+    transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    padding: 12px 20px;
+    border-radius: 14px;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 17px;
+    z-index: 101;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+  }
+  #toast.on { opacity: 1; }
+
+  @media (min-width: 700px) {
+    main { padding-top: 48px; }
+    h1 { font-size: 40px; }
+    .card { padding: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Приложение</h1>
+    <div class="theme" role="group" aria-label="Тема">
+      <button type="button" data-theme-set="auto" title="Как в системе" aria-label="Как в системе"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" class="fill"/></svg></button>
+      <button type="button" data-theme-set="light" title="Светлая" aria-label="Светлая"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></button>
+      <button type="button" data-theme-set="dark" title="Тёмная" aria-label="Тёмная"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg></button>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Здравствуйте!</h2>
+    <p>Это стартовое приложение из шаблона. Замените этот текст и примеры ниже на своё.</p>
+    <p class="muted">Добавьте на экран «Домой»: «Поделиться» → «На экран „Домой“».</p>
+  </section>
+
+  <section class="card">
+    <h2>Счётчик</h2>
+    <div class="row">
+      <button type="button" class="btn big" id="minus" aria-label="Меньше">−</button>
+      <div class="counter" id="count" aria-live="polite">0</div>
+      <button type="button" class="btn big" id="plus" aria-label="Больше">+</button>
+      <button type="button" class="btn ghost" id="reset">Сбросить</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Заметка</h2>
+    <label for="note">Сохраняется на этом устройстве</label>
+    <textarea id="note" placeholder="Напишите что-нибудь…"></textarea>
+    <p class="muted" style="margin-top:12px">Пока вы печатаете, приложение не обновится само — покажет кнопку «Обновить».</p>
+  </section>
+
+  <footer>Версия <span id="ver"></span> · <button type="button" class="btn ghost" id="checkupd" style="min-height:44px;font-size:15px;padding:6px 10px">проверить обновление</button></footer>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- хранилище: localStorage может быть недоступен (частный режим) — тогда просто не сохраняем ----------
+  const APP_KEY = 'app-' + location.pathname.replace(/[^a-z0-9]+/gi, '-'); // у каждого приложения на github.io свой ключ
+  const store = {
+    get(k, def) { try { const v = localStorage.getItem(APP_KEY + ':' + k); return v === null ? def : JSON.parse(v); } catch (e) { return def; } },
+    set(k, v) { try { localStorage.setItem(APP_KEY + ':' + k, JSON.stringify(v)); } catch (e) { /* нет хранилища */ } }
+  };
+
+  const $ = (s) => document.querySelector(s);
+  let toastTm = 0;
+  function toast(text, ms) {
+    const el = $('#toast');
+    el.textContent = text;
+    el.classList.add('on');
+    clearTimeout(toastTm);
+    toastTm = setTimeout(() => el.classList.remove('on'), ms || 2400);
+  }
+
+  // ---------- тема: как в системе / светлая / тёмная ----------
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    else delete document.documentElement.dataset.theme;
+    document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeSet === (t || 'auto'))));
+  }
+  applyTheme(store.get('theme', 'auto'));
+  document.querySelectorAll('[data-theme-set]').forEach((b) => b.addEventListener('click', () => {
+    store.set('theme', b.dataset.themeSet);
+    applyTheme(b.dataset.themeSet);
+  }));
+
+  // ---------- пример: счётчик ----------
+  let count = store.get('count', 0);
+  const showCount = () => { $('#count').textContent = count; store.set('count', count); };
+  $('#plus').addEventListener('click', () => { count++; showCount(); });
+  $('#minus').addEventListener('click', () => { count--; showCount(); });
+  $('#reset').addEventListener('click', () => { count = 0; showCount(); });
+  showCount();
+
+  // ---------- пример: заметка (сохраняется при каждом вводе) ----------
+  const note = $('#note');
+  note.value = store.get('note', '');
+  note.addEventListener('input', () => store.set('note', note.value));
+
+  // ---------- самообновление ----------
+  // В начале index.html лежит метка сборки <meta name="app-build">, её ставит tools/stamp.py.
+  // При открытии, при возврате в приложение и раз в 10 минут скачиваем начало свежего index.html (несколько КБ)
+  // и сравниваем метки. Нашлась новая сборка: если человек ничем не занят — перезагружаемся сразу,
+  // если занят (см. isBusy) — показываем плашку «Обновить».
+  const BUILD = (document.querySelector('meta[name="app-build"]') || {}).content || '';
+  const UPD_ON = !!BUILD && BUILD !== 'dev' && /^https?:$/.test(location.protocol);
+  const UPD_KEY = APP_KEY + ':upd';
+  let updNew = null, updAt = 0, updBusy = false, updGoing = false;
+  $('#ver').textContent = BUILD || '—';
+
+  // «Посреди работы»: курсор в поле ввода или приложение само сказало, что занято.
+  // В своём приложении добавьте сюда свои условия (идёт тест, открыто окно, не сохранена форма…).
+  window.appBusy = window.appBusy || (() => false);
+  function isBusy() {
+    const a = document.activeElement;
+    if (a && (a.matches('input, textarea, select') || a.isContentEditable)) return true;
+    try { return !!window.appBusy(); } catch (e) { return false; }
+  }
+
+  const updGet = () => { try { return JSON.parse(sessionStorage.getItem(UPD_KEY) || 'null'); } catch (e) { return null; } };
+  const updPut = (v) => { try { if (v) sessionStorage.setItem(UPD_KEY, JSON.stringify(v)); else sessionStorage.removeItem(UPD_KEY); } catch (e) { /* нет хранилища */ } };
+
+  async function updCheck(force) {
+    if (!UPD_ON || updBusy || updGoing || (!force && Date.now() - updAt < 60000) || navigator.onLine === false) return null;
+    updBusy = true; updAt = Date.now();
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    const tm = setTimeout(() => ctl && ctl.abort(), 9000);
+    let found = null;
+    try {
+      // ?upd=время — чтобы не получить старую копию из кэша браузера или GitHub Pages
+      const r = await fetch(location.pathname + '?upd=' + Date.now(), { cache: 'no-store', headers: { Range: 'bytes=0-4095' }, signal: ctl ? ctl.signal : undefined });
+      let txt = '';
+      if (r.body && r.body.getReader && typeof TextDecoder === 'function') {
+        const rd = r.body.getReader(), dec = new TextDecoder();
+        while (txt.length < 16384) {
+          const x = await rd.read();
+          if (x.done) break;
+          txt += dec.decode(x.value, { stream: true });
+          if (/name="app-build" content="[^"]*"/.test(txt)) break;
+        }
+        try { rd.cancel(); } catch (e) { /* уже закрыт */ }
+      } else txt = (await r.text()).slice(0, 16384);
+      const m = (r.ok || r.status === 206) && txt.match(/name="app-build" content="([^"]+)"/);
+      if (m && m[1] !== BUILD && m[1] !== 'dev') { found = updNew = m[1]; updTick(); }
+    } catch (e) { /* нет связи — проверим в следующий раз */ }
+    clearTimeout(tm); updBusy = false;
+    return found;
+  }
+
+  function updTick() {
+    if (!updNew || updGoing) return;
+    const tried = updGet();
+    // защита от петли: если уже дважды за 10 минут пытались обновиться до этой сборки — только плашка
+    const looping = tried && tried.to === updNew && tried.n >= 2 && Date.now() - tried.at < 600000;
+    if (isBusy() || looping) updBar(true); else updGo();
+  }
+
+  function updGo() {
+    if (!updNew || updGoing) return;
+    updGoing = true;
+    const tried = updGet();
+    updPut({ to: updNew, at: Date.now(), n: tried && tried.to === updNew ? (tried.n || 0) + 1 : 1 });
+    toast('Обновляю приложение…', 2000);
+    setTimeout(() => location.replace(location.pathname + '?v=' + encodeURIComponent(updNew) + location.hash), 600);
+  }
+
+  function updBar(on) {
+    let el = document.getElementById('updbar');
+    if (!on) { if (el) el.remove(); return; }
+    if (el) return;
+    el = document.createElement('div');
+    el.id = 'updbar';
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<span><b>Вышла новая версия</b><small>Обновление займёт пару секунд</small></span>'
+      + '<button type="button" class="btn" data-upd="go">Обновить</button>'
+      + '<button type="button" class="x" data-upd="x" aria-label="Позже">✕</button>';
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-upd]');
+      if (!b) return;
+      if (b.dataset.upd === 'go') updGo(); else { el.remove(); updNew = null; }
+    });
+    document.body.appendChild(el);
+  }
+
+  $('#checkupd').addEventListener('click', async () => {
+    if (!UPD_ON) { toast('Проверка работает только на сайте'); return; }
+    toast('Проверяю…', 1200);
+    const f = await updCheck(true);
+    if (!f) toast('Это последняя версия');
+  });
+
+  if (UPD_ON) {
+    const was = updGet();
+    if (was && was.to === BUILD) { updPut(null); setTimeout(() => toast('Приложение обновлено'), 500); }
+    // убираем ?v=… из адреса после обновления
+    if (/[?&]v=/.test(location.search) && history.replaceState) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* не страшно */ } }
+    setTimeout(() => updCheck(true), 1500);
+    setInterval(() => { if (document.visibilityState === 'visible') updCheck(); }, 600000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') updCheck(true); });
+    window.addEventListener('pageshow', (e) => { if (e.persisted) updCheck(true); });
+    window.addEventListener('online', () => updCheck(true));
+  }
+
+  // для проверок (tools/check.js)
+  window.__upd = { get build() { return BUILD; }, get on() { return UPD_ON; }, get found() { return updNew; }, check: () => updCheck(true), busy: isBusy };
+})();
+</script>
+</body>
+</html>
